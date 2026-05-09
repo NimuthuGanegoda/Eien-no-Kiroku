@@ -22,7 +22,7 @@ function App() {
       const item = data.message;
       return {
         title: item.title?.[0] || 'Unknown Title',
-        authors: item.author?.map((a: any) => `${a.given || ''} ${a.family || ''}`.strip()) || ['Unknown Author'],
+        authors: item.author?.map((a: any) => `${a.given || ''} ${a.family || ''}`.trim()) || ['Unknown Author'],
         year: item.issued?.['date-parts']?.[0]?.[0],
         publisher: item.publisher,
         source: 'Crossref (Scientific DOI)'
