@@ -2,6 +2,8 @@
 
 > "Eternity is not a destination, but the path we pave with every record."
 
+## 🌐 [VIEW LIVE DASHBOARD HERE](https://nimuthuganegoda.github.io/Eien-no-Kiroku/) 🌐
+
 [![Eien-no-Kiroku CI](https://github.com/NimuthuGanegoda/Eien-no-Kiroku/actions/workflows/ci.yml/badge.svg)](https://github.com/NimuthuGanegoda/Eien-no-Kiroku/actions/workflows/ci.yml)
 
 **Eien-no-Kiroku** (Eternal Record) is a next-generation, AI-powered referencing tool designed to bring absolute order to the chaos of academic research. Built for the elite, it aims to surpass tools like Mendeley and MyBib by providing **100% accurate**, fully automated metadata detection. ⚡🌸
