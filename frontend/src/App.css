@@ -105,6 +105,23 @@ button:disabled {
   cursor: wait;
 }
 
+.secondary-btn {
+  padding: 8px 15px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(224, 170, 255, 0.3);
+  color: var(--text-light);
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  box-shadow: none;
+}
+
+.secondary-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
 .results {
   text-align: left;
   background: rgba(255, 255, 255, 0.05);

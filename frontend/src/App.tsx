@@ -7,6 +7,8 @@ interface Citation {
   year?: string | number;
   publisher?: string;
   source: string;
+  idType?: 'doi' | 'isbn' | 'url';
+  idValue?: string;
 }
 
 function App() {
@@ -14,6 +16,36 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<Citation | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  const generateBibTeX = (citation: Citation) => {
+    const authorFormat = citation.authors.join(' and ');
+    const idClean = citation.title.split(' ')[0].replace(/[^a-zA-Z]/g, '') + (citation.year || 'ND');
+    
+    let type = 'misc';
+    if (citation.source.includes('DOI')) type = 'article';
+    if (citation.source.includes('ISBN')) type = 'book';
+
+    return `@${type}{${idClean},
+  title = {${citation.title}},
+  author = {${authorFormat}},
+  year = {${citation.year || 'n.d.'}},
+  publisher = {${citation.publisher || 'Unknown'}},
+${citation.idType === 'doi' ? `  doi = {${citation.idValue}}` : ''}${citation.idType === 'isbn' ? `  isbn = {${citation.idValue}}` : ''}${citation.idType === 'url' ? `  url = {${citation.idValue}}` : ''}
+}`;
+  };
+
+  const copyBibTeX = async () => {
+    if (!result) return;
+    const bibtex = generateBibTeX(result);
+    try {
+      await navigator.clipboard.writeText(bibtex);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      setError("Failed to copy to clipboard.");
+    }
+  };
 
   const extractDOI = async (doi: string) => {
     const res = await fetch(`https://api.crossref.org/works/${doi}`);
@@ -25,7 +57,9 @@ function App() {
         authors: item.author?.map((a: any) => `${a.given || ''} ${a.family || ''}`.trim()) || ['Unknown Author'],
         year: item.issued?.['date-parts']?.[0]?.[0],
         publisher: item.publisher,
-        source: 'Crossref (Scientific DOI)'
+        source: 'Crossref (Scientific DOI)',
+        idType: 'doi' as const,
+        idValue: doi
       };
     }
     throw new Error('DOI not found');
@@ -43,12 +77,15 @@ function App() {
           authors: item.authors || ['Unknown Author'],
           year: item.publishedDate?.split('-')[0],
           publisher: item.publisher,
-          source: 'Google Books (ISBN)'
+          source: 'Google Books (ISBN)',
+          idType: 'isbn' as const,
+          idValue: isbn
         };
       }
     }
     throw new Error('ISBN not found');
   };
+
 
   const handleExtract = async () => {
     if (!input) return;
@@ -112,7 +149,16 @@ function App() {
         <div className="results">
           <div className="result-header">
             <h3>Record Identified 🌸</h3>
-            <span className="source-tag">{result.source}</span>
+            <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+              <button 
+                className="secondary-btn" 
+                onClick={copyBibTeX}
+                title="Copy as BibTeX"
+              >
+                {copied ? '✅ Copied!' : '📋 Copy BibTeX'}
+              </button>
+              <span className="source-tag">{result.source}</span>
+            </div>
           </div>
           <div className="field">
             <div className="label">Title</div>
