@@ -2,8 +2,17 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
 import requests
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Eien-no-Kiroku API")
+
+# Enable CORS for the frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class CitationRequest(BaseModel):
     url: Optional[str] = None
@@ -23,17 +32,37 @@ def read_root():
 
 @app.post("/extract", response_model=CitationResponse)
 async def extract_metadata(request: CitationRequest):
-    # Placeholder for logic
     if request.doi:
-        # Crossref logic here
-        return {
-            "title": "Sample Title for DOI " + request.doi,
-            "authors": ["Author One", "Author Two"],
-            "year": 2024,
-            "publisher": "Eternal Press",
-            "source": "Crossref"
-        }
+        # Real Crossref API call
+        try:
+            url = f"https://api.crossref.org/works/{request.doi}"
+            response = requests.get(url, timeout=10)
+            if response.status_code == 200:
+                data = response.json()["message"]
+                authors = [f"{a.get('given', '')} {a.get('family', '')}".strip() for a in data.get("author", [])]
+                year = data.get("issued", {}).get("date-parts", [[None]])[0][0]
+                return {
+                    "title": data.get("title", ["Unknown Title"])[0],
+                    "authors": authors or ["Unknown Author"],
+                    "year": year,
+                    "publisher": data.get("publisher", "Unknown Publisher"),
+                    "source": "Crossref"
+                }
+            else:
+                raise HTTPException(status_code=404, detail="DOI not found")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
     
+    if request.isbn:
+        # Placeholder for Google Books
+        return {
+            "title": f"Book Search for ISBN {request.isbn}",
+            "authors": ["ISBN Logic Needed"],
+            "year": 2024,
+            "publisher": "Google Books (Simulated)",
+            "source": "ISBN Engine"
+        }
+
     raise HTTPException(status_code=400, detail="Must provide DOI, ISBN, or URL")
 
 if __name__ == "__main__":
