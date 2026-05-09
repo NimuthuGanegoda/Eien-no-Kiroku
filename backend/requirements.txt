@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+requests
+beautifulsoup4
+crossrefapi
+google-api-python-client
+pypdf
+openai
+pydantic
