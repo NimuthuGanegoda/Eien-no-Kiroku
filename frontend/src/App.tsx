@@ -2,7 +2,7 @@ import { useState } from 'react'
 import './App.css'
 
 interface Citation {
-  title: str;
+  title: string;
   authors: string[];
   year?: number;
   publisher?: string;
