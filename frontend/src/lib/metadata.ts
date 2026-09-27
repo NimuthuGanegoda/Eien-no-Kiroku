@@ -43,13 +43,23 @@ interface CrossrefMessage {
   URL?: string;
 }
 
+function crossrefType(typeHint: string, hasContainer: boolean): SourceType {
+  if (typeHint.includes('journal')) return 'journal';
+  if (typeHint.includes('proceedings')) return 'conference';
+  if (typeHint.includes('book-chapter') || typeHint.includes('chapter') || typeHint.includes('book-section')) return 'chapter';
+  if (typeHint.includes('report') || typeHint.includes('monograph')) return 'report';
+  if (typeHint.includes('dissertation') || typeHint.includes('thesis')) return 'thesis';
+  if (typeHint.includes('book')) return 'book';
+  return hasContainer ? 'journal' : detectSourceType({});
+}
+
 function mapCrossref(m: CrossrefMessage, idValue: string): Citation {
   const journal = m['container-title']?.[0];
   const typeHint = m.type || '';
   const authors = (m.author || []).map((a) => `${a.given || ''} ${a.family || ''}`.trim()).filter(Boolean);
   return {
     id: makeId(),
-    type: typeHint.includes('journal') || journal ? 'journal' : typeHint.includes('book') ? 'book' : detectSourceType({ journal, publisher: m.publisher }),
+    type: crossrefType(typeHint, !!journal),
     title: m.title?.[0] || 'Unknown Title',
     authors: authors.length ? authors : ['Unknown Author'],
     year: m.issued?.['date-parts']?.[0]?.[0] ? String(m.issued['date-parts'][0][0]) : undefined,
@@ -214,9 +224,12 @@ export async function fetchByURL(url: string): Promise<Citation> {
     const volume = metaContent(doc, ['meta[name="citation_volume"]']);
     const issue = metaContent(doc, ['meta[name="citation_issue"]']);
 
+    // Video platforms (BibGuru/EasyBib "video" source type)
+    const isVideo = /youtube|youtu\.be|vimeo|dailymotion|tiktok/i.test(hostname);
+
     return {
       id: makeId(),
-      type: detectSourceType({ journal, publisher: site, url }),
+      type: isVideo ? 'video' : detectSourceType({ journal, publisher: site, url }),
       title,
       authors: authors.length ? authors : ['Auto-detected'],
       year,

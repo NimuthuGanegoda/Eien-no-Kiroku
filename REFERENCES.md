@@ -8,8 +8,10 @@ strengths and purge their weaknesses.
 
 ### 1. Zotero & ZoteroBib ([zbib.org](https://zbib.org)) — *the gold standard, open source*
 - **Strengths:** 10,000+ CSL citation styles, instant bibliography from any identifier,
-  parenthetical citations & footnotes, export to HTML / RTF / RIS / BibTeX, browser
-  one-click capture ("Translation Server"), collections, tags, notes, group libraries.
+  parenthetical citations **plus footnotes/endnotes ("Copy Note" — enter a page range or
+  section first)**, export to HTML / RTF / RIS / BibTeX, **`/import` endpoint that accepts
+  BibTeX/RIS files from any manager**, browser one-click capture ("Translation Server"),
+  collections, tags, notes, group libraries.
 - **Weaknesses:** Bloated desktop-first UI; the slim web version (ZoteroBib) cannot store
   projects across sessions.
 
@@ -31,17 +33,30 @@ strengths and purge their weaknesses.
   bulk export to Google Docs / Word, plagiarism & grammar checkers (paid).
 - **Weaknesses:** Heavy ads, most styles paywalled on the free tier.
 
-### 5. BibMe & Cite This For Me — *quick generators*
-- **Strengths:** One-box citation entry, auto-formatting, source-type variety,
-  copy/export bibliographies.
-- **Weaknesses:** Shallow library management, aggressive upsells.
+### 5. BibMe & Cite This For Me — *quick generators + collaboration*
+- **Strengths:** One-box citation entry, auto-formatting, 34 source types, 7,500 styles,
+  **library search & filtering** (sort by added date/author/title/year), **share your
+  bibliography with group members or send it by email**, one-click in-text copy,
+  download .docx/.rtf, export to Google Drive / Evernote.
+- **Weaknesses:** Shallow metadata depth, aggressive upsells.
 
-### 6. Paperpile — *Google Workspace native*
+### 6. BibGuru ([bibguru.com](https://www.bibguru.com)) — *clean, ad-light student favorite*
+- **Strengths:** Search by URL, DOI, ISBN, **author name** or title; **60+ source types**
+  including whole books vs. individual chapters; **auto-alphabetized bibliographies**;
+  missing-information alerts; in-text citation copying; quick style switching; sharing.
+- **Weaknesses:** No deep library management or PDF tools.
+
+### 7. KnightCite (Calvin University Hekman Library) — *library-built classic*
+- **Strengths:** 25+ resource types, MLA/APA/Chicago, citation editing,
+  **alphabetize & export to Word**.
+- **Weaknesses:** Only 3 styles; aging interface.
+
+### 8. Paperpile — *Google Workspace native*
 - **Strengths:** One-click Chrome capture, Google Docs CWYW, Drive-backed PDF storage,
   mobile apps.
 - **Weaknesses:** Subscription-only.
 
-### 7. EndNote / RefWorks / Citavi — *institutional suites*
+### 9. EndNote / RefWorks / Citavi — *institutional suites*
 - **Strengths:** Deep Word integration, team libraries, 6,000–10,000 styles, RIS/BibTeX
   interchange with every database.
 - **Weaknesses:** Expensive, heavyweight, institution-locked.
@@ -61,38 +76,51 @@ strengths and purge their weaknesses.
 
 What the other websites do — and what Eien-no-Kiroku now includes:
 
-| Feature | ZoteroBib | MyBib | EasyBib | Mendeley | **Eien-no-Kiroku** |
-|---|:---:|:---:|:---:|:---:|:---:|
-| Auto-detect DOI / ISBN / URL | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Search sources by title/keywords | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Multi-source metadata (Crossref, Google Books, Open Library) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Scholarly meta-tag scraping for URLs | ✅ | ✅ | ✅ | ✅ | ✅ |
-| APA 7 / MLA 9 / Chicago / Harvard | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Vancouver / IEEE styles | ✅ | ✅ | ⚠️ | ✅ | ✅ |
-| In-text citations (parenthetical + narrative) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Editable records + missing-field warnings | ⚠️ | ✅ | ✅ | ✅ | ✅ |
-| Multiple source types (journal, book, website, report, thesis) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Bibliography manager (sort, delete, persist) | ❌ | ✅ | ✅ | ✅ | ✅ |
-| Export BibTeX (.bib) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Export RIS (.ris) — Zotero/EndNote/Mendeley import | ✅ | ⚠️ | ⚠️ | ✅ | ✅ |
-| Export Word (.doc) / HTML / RTF / CSV / TXT | ✅ | ✅ | ✅ | ⚠️ | ✅ |
-| Copy formatted bibliography (rich text) | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Print bibliography | ✅ | ✅ | ✅ | ⚠️ | ✅ |
-| Free, no ads, no account required | ✅ | ✅ | ❌ | ❌ | ✅ |
-| PDF parsing / annotation (GROBID pipeline) | ✅ | ❌ | ❌ | ✅ | 🚧 planned |
-| Word/Google Docs plugin | ✅ | ✅ | ✅ | ✅ | 🚧 planned |
-| Plagiarism & grammar checker | ❌ | ❌ | 💰 | ❌ | ❌ (out of scope) |
+| Feature | ZoteroBib | MyBib | EasyBib | BibGuru | Cite This For Me | **Eien-no-Kiroku** |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| Auto-detect DOI / ISBN / URL | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Search sources by title/author keywords | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Multi-source metadata (Crossref, Google Books, Open Library) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Scholarly meta-tag scraping for URLs | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| APA 7 / MLA 9 / Chicago / Harvard | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Vancouver / IEEE styles | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ |
+| In-text citations (parenthetical + narrative) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Page/section locator in citations | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ |
+| Footnotes / endnotes ("Copy Note") | ✅ | ⚠️ | ⚠️ | ❌ | ✅ | ✅ |
+| Editable records + missing-field warnings | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Multiple source types (9 incl. chapter, video, newspaper, conference) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Notes & tags on records | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Bibliography manager (auto style-order, sort, delete, persist) | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Library search / filtering | ❌ | ⚠️ | ✅ | ❌ | ✅ | ✅ |
+| Duplicate detection notice | ❌ | ⚠️ | ✅ | ❌ | ❌ | ✅ |
+| Import BibTeX / RIS (paste or upload) | ✅ | ⚠️ | ⚠️ | ❌ | ⚠️ | ✅ |
+| Export BibTeX (.bib) | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| Export RIS (.ris) — Zotero/EndNote/Mendeley import | ✅ | ⚠️ | ⚠️ | ❌ | ⚠️ | ✅ |
+| Export Word (.doc) / HTML / RTF / CSV / TXT | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Copy formatted bibliography (rich text) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Share (Web Share API, email, embeddable HTML) | ✅ | ⚠️ | ❌ | ⚠️ | ✅ | ✅ |
+| Print bibliography | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| Free, no ads, no account required | ✅ | ✅ | ❌ | ⚠️ | ❌ | ✅ |
+| PDF parsing / annotation (GROBID pipeline) | ✅ | ❌ | ❌ | ❌ | ❌ | 🚧 planned |
+| Word/Google Docs plugin | ✅ | ✅ | ✅ | ✅ | ✅ | 🚧 planned |
+| Real-time group collaboration | ❌ | ❌ | ❌ | ❌ | 💰 | 🚧 planned |
+| Plagiarism & grammar checker | ❌ | ❌ | 💰 | 💰 | 💰 | ❌ (out of scope) |
 
 ✅ = included · ⚠️ = partial · 💰 = paid · 🚧 = on the roadmap
 
 ## 🧠 Strategy for Eien-no-Kiroku
-1. **Multi-Source Fetching**: Crossref (DOI + title search), Google Books (ISBN + search),
-   Open Library (fallback), and Zotero-translation-style URL meta scraping — implemented.
+1. **Multi-Source Fetching**: Crossref (DOI + title/author search), Google Books (ISBN +
+   search), Open Library (fallback), and Zotero-translation-style URL meta scraping —
+   implemented.
 2. **One-Box, Any-Input**: A single search box that auto-detects DOI / ISBN / URL / title —
    implemented.
 3. **Style Engine**: APA 7, MLA 9, Chicago, Harvard, Vancouver, IEEE + BibTeX with live
-   preview and in-text citations — implemented.
-4. **Export Suite**: Word, HTML, RTF, BibTeX, RIS, CSV, TXT, print — implemented.
-5. **AI-Verification**: Employ LLMs to verify extracted metadata against the original source
+   preview, in-text citations with page locators, and footnotes ("Copy Note") — implemented.
+4. **Export & Import Suite**: Word, HTML, RTF, BibTeX, RIS, CSV, TXT, print, share/email/
+   embed — plus BibTeX/RIS import from Zotero, Mendeley, EndNote or any database —
+   implemented.
+5. **Library Intelligence**: auto style-ordering (alpha for author-date styles, citation
+   order for numbered styles), filtering, tags, notes, duplicate detection — implemented.
+6. **AI-Verification**: Employ LLMs to verify extracted metadata against the original source
    text to guarantee 100% correctness — planned.
-6. **PDF Alchemy**: GROBID-based "Drop and Forget" PDF metadata extraction — planned.
+7. **PDF Alchemy**: GROBID-based "Drop and Forget" PDF metadata extraction — planned.

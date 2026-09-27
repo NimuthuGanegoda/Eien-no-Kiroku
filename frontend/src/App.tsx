@@ -1,18 +1,21 @@
 import { useState, useMemo } from 'react'
 import {
   Search, FileText, Clipboard, Check, LogIn, LogOut, Trash2, Download,
-  Printer, AlertTriangle, Edit3, X, Plus,
+  Printer, AlertTriangle, Edit3, X, Plus, Upload, Share2, Mail, StickyNote,
 } from 'lucide-react'
 import './App.css'
 import type { Citation, CitationStyle, SourceType } from './lib/citation'
 import {
-  STYLES, SOURCE_TYPES, blankCitation, formatBibliography, formatCitation,
-  generateBibTeX, inTextNarrative, inTextParenthetical, missingFieldWarnings,
+  STYLES, SOURCE_TYPES, autoOrder, blankCitation, containerLabel, formatBibliography,
+  formatCitation, formatFootnote, generateBibTeX, inTextNarrative, inTextParenthetical,
+  missingFieldWarnings,
 } from './lib/citation'
 import { detectAndFetch } from './lib/metadata'
+import { parseImport } from './lib/importers'
 import {
-  copyRich, exportBibTeX, exportCSV, exportHTML, exportPlainText, exportRIS,
-  exportRTF, exportWord, printBibliography, styleName,
+  copyRich, emailBibliography, embedHTML, exportBibTeX, exportCSV, exportHTML,
+  exportPlainText, exportRIS, exportRTF, exportWord, printBibliography,
+  shareBibliography, styleName,
 } from './lib/exporters'
 
 // ---------------------------------------------------------------------------
@@ -70,13 +73,18 @@ function App() {
   const [draft, setDraft] = useState<Citation | null>(null)
   const [searchResults, setSearchResults] = useState<Citation[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
   const [library, setLibrary] = useState<Citation[]>(loadLibrary)
   const [style, setStyle] = useState<CitationStyle>(() => {
     const saved = localStorage.getItem(STYLE_KEY) as CitationStyle | null
     return saved && STYLES.some((s) => s.id === saved) ? saved : 'apa'
   })
-  const [sort, setSort] = useState<'recent' | 'author' | 'year' | 'title'>('recent')
+  const [sort, setSort] = useState<'auto' | 'recent' | 'author' | 'year' | 'title'>('auto')
+  const [filter, setFilter] = useState('')
+  const [locator, setLocator] = useState('')
+  const [importOpen, setImportOpen] = useState(false)
+  const [importText, setImportText] = useState('')
   const [view, setView] = useState<'home' | 'auth'>('home')
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [user, setUser] = useState<{ email: string } | null>(() => {
@@ -103,10 +111,23 @@ function App() {
   // Detection pipeline
   // -------------------------------------------------------------------------
 
+  const addToLibrary = (citation: Citation) => {
+    const exists = library.some((h) => recordKey(h) === recordKey(citation))
+    const next = [citation, ...library.filter((h) => recordKey(h) !== recordKey(citation))]
+    persistLibrary(next)
+    setNotice(
+      exists
+        ? 'This source is already in your bibliography — the record has been updated with the latest details.'
+        : 'Saved to My Bibliography.'
+    )
+    setTimeout(() => setNotice(null), 4000)
+  }
+
   const handleExtract = async () => {
     if (!input.trim()) return
     setLoading(true)
     setError(null)
+    setNotice(null)
     setSearchResults(null)
     setDraft(null)
     try {
@@ -130,11 +151,6 @@ function App() {
     }
   }
 
-  const addToLibrary = (citation: Citation) => {
-    const next = [citation, ...library.filter((h) => recordKey(h) !== recordKey(citation))]
-    persistLibrary(next)
-  }
-
   const pickResult = (c: Citation) => {
     setDraft(c)
     setSearchResults(null)
@@ -152,6 +168,7 @@ function App() {
 
   const startManualEntry = () => {
     setError(null)
+    setNotice(null)
     setSearchResults(null)
     setDraft(blankCitation('journal'))
   }
@@ -168,16 +185,65 @@ function App() {
   }
 
   // -------------------------------------------------------------------------
+  // Import (ZoteroBib "/import" parity — pasted or uploaded BibTeX / RIS)
+  // -------------------------------------------------------------------------
+
+  const runImport = (text: string) => {
+    const parsed = parseImport(text)
+    if (parsed.length === 0) {
+      setError('Nothing recognizable found. Paste BibTeX (.bib) or RIS (.ris) content.')
+      return
+    }
+    setError(null)
+    const merged = [...library]
+    let added = 0
+    let updated = 0
+    for (const c of parsed) {
+      const idx = merged.findIndex((h) => recordKey(h) === recordKey(c))
+      if (idx >= 0) {
+        merged[idx] = { ...merged[idx], ...c, id: merged[idx].id, notes: merged[idx].notes || c.notes }
+        updated++
+      } else {
+        merged.push(c)
+        added++
+      }
+    }
+    persistLibrary(merged)
+    setImportOpen(false)
+    setImportText('')
+    setNotice(`Import complete — ${added} added, ${updated} updated.`)
+    setTimeout(() => setNotice(null), 5000)
+  }
+
+  const handleFileImport = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = () => runImport(String(reader.result || ''))
+    reader.readAsText(file)
+  }
+
+  // -------------------------------------------------------------------------
   // Derived data
   // -------------------------------------------------------------------------
 
   const sortedLibrary = useMemo(() => {
+    if (sort === 'auto') return autoOrder(library, style)
     const copy = [...library]
     if (sort === 'author') copy.sort((a, b) => (a.authors[0] || '').localeCompare(b.authors[0] || ''))
     else if (sort === 'year') copy.sort((a, b) => (b.year || '0').localeCompare(a.year || '0'))
     else if (sort === 'title') copy.sort((a, b) => a.title.localeCompare(b.title))
     return copy
-  }, [library, sort])
+  }, [library, sort, style])
+
+  const filteredLibrary = useMemo(() => {
+    const q = filter.trim().toLowerCase()
+    if (!q) return sortedLibrary
+    return sortedLibrary.filter((c) =>
+      [c.title, c.authors.join(' '), c.journal || '', c.publisher || '', c.year || '', (c.tags || []).join(' '), c.notes || '']
+        .join(' ')
+        .toLowerCase()
+        .includes(q)
+    )
+  }, [sortedLibrary, filter])
 
   const warnings = useMemo(() => (draft ? missingFieldWarnings(draft, style) : []), [draft, style])
 
@@ -260,13 +326,53 @@ function App() {
           </div>
 
           <div className="search-actions">
-            <span className="detect-hint">Auto-detects: DOI · ISBN · URL · Title keywords</span>
-            <button onClick={startManualEntry} className="ghost-btn"><Plus size={15} /> Enter manually</button>
+            <span className="detect-hint">Auto-detects: DOI · ISBN · URL · Title/author keywords</span>
+            <div className="btn-row">
+              <button onClick={startManualEntry} className="ghost-btn"><Plus size={15} /> Enter manually</button>
+              <button onClick={() => setImportOpen((v) => !v)} className="ghost-btn"><Upload size={15} /> Import BibTeX / RIS</button>
+            </div>
           </div>
 
           {error && (
             <div className="error-msg">
               <AlertTriangle size={16} /> {error}
+            </div>
+          )}
+          {notice && (
+            <div className="notice-msg">
+              <Check size={16} /> {notice}
+            </div>
+          )}
+
+          {/* -------- Import panel (ZoteroBib /import parity) -------- */}
+          {importOpen && (
+            <div className="results active">
+              <div className="result-header">
+                <h3><Upload size={20} /> Import References</h3>
+                <button onClick={() => setImportOpen(false)} className="icon-btn"><X size={16} /></button>
+              </div>
+              <p className="import-hint">
+                Paste BibTeX or RIS content below — or upload a .bib / .ris file exported from Zotero, Mendeley, EndNote or any database.
+              </p>
+              <textarea
+                className="import-textarea"
+                placeholder={'@article{key,\n  title = {...},\n  author = {...}\n}\n\n— or —\n\nTY  - JOUR\nAU  - Smith, John\nTI  - Title\nER  - '}
+                value={importText}
+                onChange={(e) => setImportText(e.target.value)}
+              />
+              <div className="result-actions">
+                <label className="action-btn file-label">
+                  <Upload size={18} /> Choose file
+                  <input
+                    type="file"
+                    accept=".bib,.ris,.txt"
+                    onChange={(e) => e.target.files?.[0] && handleFileImport(e.target.files[0])}
+                  />
+                </label>
+                <button onClick={() => runImport(importText)} className="action-btn" disabled={!importText.trim()}>
+                  <Check size={18} /> Import
+                </button>
+              </div>
             </div>
           )}
 
@@ -336,7 +442,7 @@ function App() {
                   <input value={draft.publisher || ''} onChange={(e) => updateDraft({ publisher: e.target.value })} />
                 </label>
                 <label className="field">
-                  <span>Journal</span>
+                  <span>{containerLabel(draft.type)}</span>
                   <input value={draft.journal || ''} onChange={(e) => updateDraft({ journal: e.target.value })} />
                 </label>
                 <label className="field">
@@ -363,6 +469,17 @@ function App() {
                   <span>Accessed</span>
                   <input type="date" value={draft.accessDate || ''} onChange={(e) => updateDraft({ accessDate: e.target.value })} />
                 </label>
+                <label className="field span-2">
+                  <span>Tags (comma separated)</span>
+                  <input
+                    value={(draft.tags || []).join(', ')}
+                    onChange={(e) => updateDraft({ tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
+                  />
+                </label>
+                <label className="field span-2">
+                  <span>Notes</span>
+                  <input value={draft.notes || ''} onChange={(e) => updateDraft({ notes: e.target.value })} />
+                </label>
               </div>
 
               {/* -------- Style switcher + formatted preview -------- */}
@@ -388,20 +505,38 @@ function App() {
                     <Check size={18} /> Save to Bibliography
                   </button>
                 )}
-                <button onClick={() => copyText(formatBibliography([draft], style), 'ref', true)} className="action-btn">
+                <label className="locator-wrap">
+                  <span>p./§</span>
+                  <input
+                    className="locator-input"
+                    placeholder="45 or 45-47"
+                    value={locator}
+                    onChange={(e) => setLocator(e.target.value)}
+                  />
+                </label>
+                <button
+                  onClick={() => copyText(formatBibliography([draft], style), 'ref', true)}
+                  className="action-btn"
+                >
                   {copiedKey === 'ref' ? <Check size={18} /> : <Clipboard size={18} />} Copy Citation
                 </button>
                 <button
-                  onClick={() => copyText(inTextParenthetical(draft, style, Math.max(1, library.findIndex((h) => h.id === draft.id) + 1)), 'in-paren')}
+                  onClick={() => copyText(inTextParenthetical(draft, style, Math.max(1, sortedLibrary.findIndex((h) => h.id === draft.id) + 1), locator), 'in-paren')}
                   className="action-btn"
                 >
-                  {copiedKey === 'in-paren' ? <Check size={18} /> : <Clipboard size={18} />} In-text: {inTextParenthetical(draft, style, 1)}
+                  {copiedKey === 'in-paren' ? <Check size={18} /> : <Clipboard size={18} />} In-text: {inTextParenthetical(draft, style, 1, locator)}
                 </button>
                 <button
-                  onClick={() => copyText(inTextNarrative(draft, style, Math.max(1, library.findIndex((h) => h.id === draft.id) + 1)), 'in-narr')}
+                  onClick={() => copyText(inTextNarrative(draft, style, Math.max(1, sortedLibrary.findIndex((h) => h.id === draft.id) + 1), locator), 'in-narr')}
                   className="action-btn"
                 >
-                  {copiedKey === 'in-narr' ? <Check size={18} /> : <Clipboard size={18} />} Narrative: {inTextNarrative(draft, style, 1)}
+                  {copiedKey === 'in-narr' ? <Check size={18} /> : <Clipboard size={18} />} Narrative
+                </button>
+                <button
+                  onClick={() => copyText(formatFootnote(draft, locator), 'note', true)}
+                  className="action-btn"
+                >
+                  {copiedKey === 'note' ? <Check size={18} /> : <StickyNote size={18} />} Copy Note (footnote)
                 </button>
                 {style === 'bibtex' && (
                   <button onClick={() => copyText(generateBibTeX(draft), 'bib')} className="action-btn">
@@ -416,9 +551,19 @@ function App() {
           {library.length > 0 && (
             <section className="history-section">
               <div className="section-header">
-                <h3><FileText size={20} /> My Bibliography ({library.length})</h3>
+                <h3><FileText size={20} /> My Bibliography ({filteredLibrary.length}{filter ? `/${library.length}` : ''})</h3>
                 <div className="section-tools">
+                  <div className="input-wrapper mini">
+                    <Search className="search-icon" size={15} />
+                    <input
+                      className="filter-input"
+                      placeholder="Filter library..."
+                      value={filter}
+                      onChange={(e) => setFilter(e.target.value)}
+                    />
+                  </div>
                   <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className="sort-select">
+                    <option value="auto">Style order</option>
                     <option value="recent">Recent first</option>
                     <option value="author">Author A–Z</option>
                     <option value="year">Year (newest)</option>
@@ -440,26 +585,44 @@ function App() {
                 <button onClick={() => exportCSV(sortedLibrary)} className="export-btn"><Download size={15} /> CSV</button>
                 <button onClick={() => exportPlainText(sortedLibrary, style)} className="export-btn"><Download size={15} /> TXT</button>
                 <button onClick={() => printBibliography(sortedLibrary, style)} className="export-btn"><Printer size={15} /> Print</button>
+                <button onClick={() => shareBibliography(sortedLibrary, style)} className="export-btn"><Share2 size={15} /> Share</button>
+                <button onClick={() => emailBibliography(sortedLibrary, style)} className="export-btn"><Mail size={15} /> Email</button>
+                <button
+                  onClick={() => copyText(embedHTML(sortedLibrary, style), 'embed')}
+                  className="export-btn"
+                  title="Copy an HTML snippet to embed the bibliography in a webpage"
+                >
+                  {copiedKey === 'embed' ? <Check size={15} /> : <Clipboard size={15} />} Embed HTML
+                </button>
               </div>
 
               <div className="bib-preview" dangerouslySetInnerHTML={{ __html: formatBibliography(sortedLibrary, style) }} />
 
               <div className="history-list">
-                {sortedLibrary.map((item, i) => (
+                {filteredLibrary.map((item) => (
                   <div key={item.id} className="history-item">
                     <div className="item-info">
                       <div className="item-title">{item.title}</div>
                       <div className="item-meta">
-                        {item.authors[0]} | {item.year || 'n.d.'} | {SOURCE_TYPES.find((t) => t.id === item.type)?.name} | Ref #{i + 1}
+                        {item.authors[0]} | {item.year || 'n.d.'} | {SOURCE_TYPES.find((t) => t.id === item.type)?.name}
+                        {(item.tags || []).length > 0 && <> | {(item.tags || []).map((t) => <span key={t} className="tag-chip">{t}</span>)}</>}
+                        {item.notes && <> | <StickyNote size={11} style={{ verticalAlign: '-1px' }} /> {item.notes.slice(0, 60)}{item.notes.length > 60 ? '…' : ''}</>}
                       </div>
                     </div>
                     <div className="item-actions">
                       <button
-                        onClick={() => copyText(inTextParenthetical(item, style, i + 1), `item-paren-${item.id}`)}
+                        onClick={() => copyText(inTextParenthetical(item, style, sortedLibrary.findIndex((x) => x.id === item.id) + 1, locator), `item-paren-${item.id}`)}
                         className="icon-btn"
                         title="Copy in-text citation"
                       >
                         {copiedKey === `item-paren-${item.id}` ? <Check size={16} /> : <Clipboard size={16} />}
+                      </button>
+                      <button
+                        onClick={() => copyText(formatFootnote(item, locator), `item-note-${item.id}`)}
+                        className="icon-btn"
+                        title="Copy footnote"
+                      >
+                        {copiedKey === `item-note-${item.id}` ? <Check size={16} /> : <StickyNote size={16} />}
                       </button>
                       <button onClick={() => { setDraft(item); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className="icon-btn" title="Edit record">
                         <Edit3 size={16} />

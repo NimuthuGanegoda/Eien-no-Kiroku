@@ -12,11 +12,13 @@
 
 ## ✨ Key Features ✨
 
-*   **🔍 Smart Detection:** One box for everything — drop a DOI, ISBN, URL, or just type a title, and the system auto-detects the input and extracts perfect metadata instantly (Crossref, Google Books, Open Library + scholarly meta-tag scraping).
-*   **🎨 Multi-Style Citations:** APA 7, MLA 9, Chicago, Harvard, Vancouver, IEEE and BibTeX — with live preview and **in-text citations** (parenthetical & narrative).
-*   **🛠️ Editable Records:** Fine-tune every field with instant **missing-field warnings** (author, year, journal, publisher...) — the accuracy guard rails pioneered by EasyBib.
-*   **📚 My Bibliography:** A persistent library manager — sort by author/year/title, edit, delete, and keep your references for eternity.
-*   **📦 Export Suite:** Word (.doc), HTML, RTF, BibTeX (.bib), RIS (.ris for Zotero/Mendeley/EndNote), CSV, TXT, rich-text copy, and print-ready bibliography.
+*   **🔍 Smart Detection:** One box for everything — drop a DOI, ISBN, URL, or just type a title/author, and the system auto-detects the input and extracts perfect metadata instantly (Crossref, Google Books, Open Library + scholarly meta-tag scraping).
+*   **🎨 Multi-Style Citations:** APA 7, MLA 9, Chicago, Harvard, Vancouver, IEEE and BibTeX — with live preview, **in-text citations with page locators** (parenthetical & narrative) and **footnotes** ("Copy Note", ZoteroBib-style).
+*   **📖 9 Source Types:** Journal articles, books, book chapters, websites, newspapers/magazines, conference papers, reports, theses and videos (BibGuru/EasyBib parity).
+*   **🛠️ Editable Records:** Fine-tune every field with instant **missing-field warnings** — the accuracy guard rails pioneered by EasyBib — plus **notes, tags** and **duplicate detection**.
+*   **📚 My Bibliography:** A persistent library manager — **style-aware auto-ordering** (alphabetical for APA/MLA/Chicago/Harvard, citation order for Vancouver/IEEE), sorting, filtering, editing.
+*   **🔁 Import & Export:** Import **BibTeX/RIS** from Zotero, Mendeley, EndNote or any database (paste or upload); export Word (.doc), HTML, RTF, BibTeX, RIS, CSV, TXT, rich-text copy, print-ready bibliography.
+*   **📤 Share:** Web Share API, email your bibliography, or copy embeddable HTML for your site (Cite This For Me parity).
 *   **📄 PDF Alchemy (planned):** Advanced parsing using **GROBID** to identify authors, titles, and citations from even the messiest papers.
 *   **🤖 AI Verification (planned):** Every record cross-referenced by LLMs to ensure the data is beyond reproach.
 *   **🏛️ Eternal Storage:** Your references are managed with the weight of eternity behind them.

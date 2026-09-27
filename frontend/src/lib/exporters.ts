@@ -109,3 +109,30 @@ export function printBibliography(citations: Citation[], style: CitationStyle) {
   win.focus();
   setTimeout(() => win.print(), 250);
 }
+
+/** Embeddable HTML block for a webpage (ZoteroBib HTML export / Cite This For Me share) */
+export function embedHTML(citations: Citation[], style: CitationStyle): string {
+  return `<div class="eien-bibliography">\n<h2>References</h2>\n${formatBibliography(citations, style)}\n</div>`;
+}
+
+/** Share via the Web Share API where available (Cite This For Me "share" parity) */
+export async function shareBibliography(citations: Citation[], style: CitationStyle): Promise<boolean> {
+  const text = citations.map((c) => htmlToPlain(formatBibliography([c], style))).join('\n\n');
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: `Bibliography (${styleName(style)})`, text });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+/** Send the bibliography by email (Cite This For Me "send to email" parity) */
+export function emailBibliography(citations: Citation[], style: CitationStyle) {
+  const text = citations.map((c) => htmlToPlain(formatBibliography([c], style))).join('\n\n');
+  const subject = encodeURIComponent(`Bibliography (${styleName(style)}) — Eien-no-Kiroku`);
+  const body = encodeURIComponent(text);
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
