@@ -5,4 +5,13 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/Eien-no-Kiroku/',
+  server: {
+    host: '0.0.0.0',
+    // Allow Arena live-preview hostnames to reach the dev server
+    allowedHosts: true,
+  },
+  preview: {
+    host: '0.0.0.0',
+    allowedHosts: true,
+  },
 })

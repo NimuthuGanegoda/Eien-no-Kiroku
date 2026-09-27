@@ -12,11 +12,16 @@
 
 ## ✨ Key Features ✨
 
-*   **🔍 Smart Detection:** Drop a DOI, ISBN, or URL, and watch as the system extracts perfect metadata instantly.
-*   **📄 PDF Alchemy:** Advanced parsing using **GROBID** to identify authors, titles, and citations from even the messiest papers.
-*   **🤖 AI Verification:** Every record is cross-referenced by LLMs to ensure the data is beyond reproach.
-*   **📜 Multi-Format Support:** Export to BibTeX, APA, MLA, and more with zero effort.
+*   **🔍 Smart Detection:** One box for everything — drop a DOI, ISBN, URL, or just type a title, and the system auto-detects the input and extracts perfect metadata instantly (Crossref, Google Books, Open Library + scholarly meta-tag scraping).
+*   **🎨 Multi-Style Citations:** APA 7, MLA 9, Chicago, Harvard, Vancouver, IEEE and BibTeX — with live preview and **in-text citations** (parenthetical & narrative).
+*   **🛠️ Editable Records:** Fine-tune every field with instant **missing-field warnings** (author, year, journal, publisher...) — the accuracy guard rails pioneered by EasyBib.
+*   **📚 My Bibliography:** A persistent library manager — sort by author/year/title, edit, delete, and keep your references for eternity.
+*   **📦 Export Suite:** Word (.doc), HTML, RTF, BibTeX (.bib), RIS (.ris for Zotero/Mendeley/EndNote), CSV, TXT, rich-text copy, and print-ready bibliography.
+*   **📄 PDF Alchemy (planned):** Advanced parsing using **GROBID** to identify authors, titles, and citations from even the messiest papers.
+*   **🤖 AI Verification (planned):** Every record cross-referenced by LLMs to ensure the data is beyond reproach.
 *   **🏛️ Eternal Storage:** Your references are managed with the weight of eternity behind them.
+
+> 📖 See [REFERENCES.md](REFERENCES.md) for the full competitive analysis of Zotero, Mendeley, MyBib, EasyBib & friends — and which of their features have been adopted here.
 
 ---
 
